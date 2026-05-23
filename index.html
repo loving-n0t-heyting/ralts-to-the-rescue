@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ralts to the Rescue!</title>
+    <style>
+        body {
+        font-family: 'Courier New', monospace;
+        }
+
+        .buttoncontainer {
+        display: grid;
+        grid-auto-flow: column;
+        grid-template-rows: repeat(4, 50px);
+        grid-auto-columns: 50px;
+        justify-content: center;
+        background-color: grey;
+        gap: 2px;
+        }
+
+        schmutton {
+        position: absolute;
+        height: 32px;
+        width: 32px;
+        text-align: center;
+        }
+
+        img {
+        transform: scale(2,2);
+        }
+
+    </style>
+  </head>
+<body style="background-color: greenyellow;">
+    <h1 id="header" style="font-size: 65px; text-align: center; ">Ralts to the Rescue!</h1>
+
+    <p id="expoBox" style="margin-left: 20%; margin-right: 20%;">
+      
+    </p>
+
+    <p id="textBox" style="text-align: center;">
+     
+    </p>
+
+    <div id="buttonBox" style="margin-top: 0px; margin-left: auto; margin-right: auto; position: relative; background-image: url('map0_day.png'); background-repeat: no-repeat; background-size: 100% 100%; width: 1600px; height: 1280px; image-rendering: pixelated;">
+    </div>
+
+<script>
+  var currentLevel = 0;
+
+    const lineList = [
+  [ 0, 1, 2, 3 ],   
+  [ 0, 4, 5, 6 ],
+  [ 0, 9, 10, 11 ], 
+  [ 0, 7, 8, 12 ],
+  [ 1, 4, 8, 9 ],   
+  [ 1, 6, 7, 11 ],
+  [ 1, 5, 10, 12 ], 
+  [ 3, 5, 8, 11 ],
+  [ 3, 4, 7, 10 ],  
+  [ 2, 4, 11, 12 ],
+  [ 2, 6, 8, 10 ],  
+  [ 2, 5, 7, 9 ],
+  [ 3, 6, 9, 12 ]];
+
+    const incidentMatrix = lineList.map(line => [...Array(13).keys()].map(n => +line.includes(n)));
+
+    const levelMaps = ["map0_day.png", "map0_night.png", "map1_day.png", "map1_night.png", "map2_day.png", "map2_night.png"];
+
+    const levelText = ["TOGETIC has been separated from her beloved son TOGEPI in the valley. Thankfully, she has a friend in RALTS. As a PSYCHIC Pok\u00E9mon, he knows TELEPORT well enough to swap himself with another Pok\u00E9mon in the area. Unfortunately, however, he still is somewhat clumsy with his psychic abilities, so one such swap might also scramble some other nearby Pok\u00E9mon. Can you guide RALTS to reuniting TOGEPI with TOGETIC, and back to his own mom GARDEVOIR while keeping the two together? Simply click on a Pok\u00E9mon to try and swap places!", 
+    "Night has fallen in the valley, and the local METANG has evolved into a METAGROSS with a child of its own: a freshly hatched BELDUM. Help RALTS to kee all three families safe and sound.", 
+    "On a cape to the east, the Pok\u00E9mon from the valley have met with yet further domestic bliss and angst. MARILL has evolved into a fully mature AZUMARILL, and is now separated from her wandering AZURILL.", 
+    "Adding to the swiftly burgeoning parenting community, FLYGON (formerly VIBRAVA) is now having trouble keeing track of her own TRAPINCH hatchling.", 
+    "In the cherry blossom forest, a final addition to the gang of haphazard parents: DONPHAN needs reuniting with her absent-minded daughter PHANPY. Can RALTS use his powers to rescue her?",
+    "In recognition of her many heroic acts of service, the forest's Pok\u00E9mon have pitched in to get the newly evolved KIRLIA an ABILITY CAPSULE, so that with MIND READER she can remain in psychic contact with her mother even in the face of distance. Now, instead, she is being beckoned by the majestic CELEBI. Get her to the SHRINE while ensuring the hetchlings are all kept by their parents!"];
+
+    const buttPositions = [
+      [[20.5, 42.5], [15.75, 9.5], [15, 46.25], [3, 48], [9, 37], [36.5, 43], [35, 20.5], [28, 30.5], [20.25, 7.5], [20.5, 19.5], [3, 6.5], [12.5, 22.5], [8.5, 8.5]],
+      [[20.5, 42.5], [15.75, 9.5], [15, 46.25], [3, 48], [9, 37], [36.5, 43], [35, 20.5], [28, 30.5], [20.25, 7.5], [20.5, 19.5], [3, 6.5], [12.5, 22.5], [8.5, 8.5]],
+      [[7, 28], [19.5, 21.5], [20.5, 39.5], [28.5, 40.75], [10.5, 36.5], [6, 2.75], [35, 23], [28.5, 30.5], [15, 11], [18.5, 26.5], [37, 1], [36, 40], [24.5, 32.5]],
+      [[7, 28], [19.5, 21.5], [20.5, 39.5], [28.5, 40.75], [10.5, 36.5], [6, 2.75], [35, 23], [28.5, 30.5], [15, 11], [18.5, 26.5], [37, 1], [36, 40], [24.5, 32.5]],
+      [[4, 13], [18.75, 19], [16.5, 34], [18.5, 44.5], [18.5, 8.5], [6, 3], [36.5, 42.5], [28.5, 16.5], [7.5, 34.5], [33.5, 22.5], [38, 3.5], [28.5, 38.5], [3.5, 26.5]],
+      [[4, 13], [18.75, 19], [16.5, 34], [18.5, 44.5], [18.5, 8.5], [6, 3], [36.5, 42.5], [28.5, 16.5], [7.5, 34.5], [33.5, 22.5], [38, 3.5], [28.5, 38.5], [3.5, 26.5]]
+      ];
+    
+    const momPositions = [
+      [[20.5, 46.5], [14.25, 9.5]],
+      [[20.5, 46.5], [14.25, 9.5], [15, 42.5]],
+      [[7, 30], [17.5, 21.5], [18.5, 39.5], [28.5, 44.25]],
+      [[7, 30], [17.5, 21.5], [18.5, 39.5], [28.5, 44.25], [8.5, 42.5]],
+      [[2.5, 16.5], [19, 22.5], [18.5, 30.5], [16.5, 42.5], [18.5, 4.5], [3, 6]],
+      [[2.5, 16.5], [19, 22.5], [18.5, 30.5], [16.5, 42.5], [18.5, 4.5], [3, 6], [35.5, 40]]
+    ]
+
+    const ralts = {id : "ralts",
+      gif : "./gifs/ralts.gif",
+      cry : "./cries/ralts.mp3"};
+    const kirlia = {id : "kirlia",
+      gif : "./gifs/kirlia.gif",
+      cry : "./cries/kirlia.mp3"};
+    const gardevoir ={id : "gardevoir",
+      gif : "./gifs/gardevoir.gif",
+      cry : "./cries/gardevoir.mp3",
+      baby: "ralts"};
+    const togepi = {id : "togepi",
+      gif : "./gifs/togepi.gif",
+      cry : "./cries/togepi.mp3"};
+    const togetic = {id : "togetic",
+      gif : "./gifs/togetic.gif",
+      cry : "./cries/togetic.mp3",
+      baby: "togepi"};
+    const togekiss = {id : "togekiss",
+      gif : "./gifs/togekiss.gif",
+      cry : "./cries/togekiss.mp3",
+      baby: "togetic"};
+    const beldum = {id : "beldum",
+      gif : "./gifs/beldum.gif",
+      cry : "./cries/beldum.mp3"};
+    const metang = {id : "metang",
+      gif : "./gifs/metang.gif",
+      cry : "./cries/metang.mp3"};
+    const metagross = {id : "metagross",
+      gif : "./gifs/metagross.gif",
+      cry : "./cries/metagross.mp3",
+      baby: "beldum"};
+    const trapinch = {id : "trapinch",
+      gif : "./gifs/trapinch.gif",
+      cry : "./cries/trapinch.mp3"};
+    const vibrava = {id : "vibrava",
+      gif : "./gifs/vibrava.gif",
+      cry : "./cries/vibrava.mp3"};
+    const flygon = {id : "flygon",
+      gif : "./gifs/flygon.gif",
+      cry : "./cries/flygon.mp3",
+      baby: "trapinch"};
+    const phanpy = {id : "phanpy",
+      gif : "./gifs/phanpy.gif",
+      cry : "./cries/phanpy.mp3"};
+    const donphan = {id : "donphan",
+      gif : "./gifs/donphan.gif",
+      cry : "./cries/donphan.mp3",
+      baby: "phanpy"};
+    const kecleon = {id : "kecleon",
+      gif : "./gifs/kecleon.gif",
+      cry : "./cries/kecleon.mp3"};
+    const azurill = {id : "azurill",
+      gif : "./gifs/azurill.gif",
+      cry : "./cries/azurill.mp3"};
+    const marill = {id : "marill",
+      gif : "./gifs/marill.gif",
+      cry : "./cries/marill.mp3"};
+    const azumarill = {id : "azumarill",
+      gif : "./gifs/azumarill.gif",
+      cry : "./cries/azumarill.mp3",
+      baby : "azurill"};
+    const mawile = {id : "mawile",
+      gif : "./gifs/mawile.gif",
+      cry : "./cries/mawile.mp3"};
+    const shuckle = {id : "shuckle",
+      gif : "./gifs/shuckle.gif",
+      cry : "./cries/shuckle.mp3"};
+    const yanma = {id : "yanma",
+      gif : "./gifs/yanma.gif",
+      cry : "./cries/yanma.mp3"};
+    const nincada = {id : "nincada",
+      gif : "./gifs/nincada.gif",
+      cry : "./cries/nincada.mp3"};
+    const ninjask = {id : "ninjask",
+      gif : "./gifs/ninjask.gif",
+      cry : "./cries/ninjask.mp3"};
+    const mareep = {id : "mareep",
+      gif : "./gifs/mareep.gif",
+      cry : "./cries/mareep.mp3"};
+    const flaaffy = {id : "flaaffy",
+      gif : "./gifs/flaaffy.gif",
+      cry : "./cries/flaaffy.mp3"};
+    const ampharos = {id : "ampharos",
+      gif : "./gifs/ampharos.gif",
+      cry : "./cries/ampharos.mp3"};
+    const heracross = {id : "heracross",
+      gif : "./gifs/heracross.gif",
+      cry : "./cries/heracross.mp3"};
+    const sneasle = {id : "sneasle",
+      gif : "./gifs/sneasle.gif",
+      cry : "./cries/sneasle.mp3"};
+    const claydol = {id : "claydol",
+      gif : "./gifs/claydol.gif",
+      cry : "./cries/claydol.mp3"};
+    const xatu = {id : "xatu",
+      gif : "./gifs/xatu.gif",
+      cry : "./cries/xatu.mp3"};
+    const suicune = {id : "suicune",
+      gif : "./gifs/suicune.gif",
+      cry : "./cries/suicune.mp3"};
+    const entei = {id : "entei",
+      gif : "./gifs/entei.gif",
+      cry : "./cries/entei.mp3"};
+    const raikou = {id : "raikou",
+      gif : "./gifs/raikou.gif",
+      cry : "./cries/raikou.mp3"};
+    const groudon = {id : "groudon",
+      gif : "./gifs/groudon.gif",
+      cry : "./cries/kyogre.mp3"};
+    const kyogre = {id : "kyogre",
+      gif : "./gifs/kyogre.gif",
+      cry : "./cries/kyogre.mp3"};
+    const latias = {id : "latias",
+      gif : "./gifs/latias.gif",
+      cry : "./cries/latias.mp3"};
+    const latios = {id : "latios",
+      gif : "./gifs/latios.gif",
+      cry : "./cries/latios.mp3"};
+    const celebi = {id : "celebi",
+      gif : "./gifs/celebi.gif",
+      cry : "./cries/celebi.mp3",
+      baby: "kirlia"};
+
+    const pokemon = [ralts, kirlia, gardevoir, togepi, togetic, beldum, metagross, trapinch, vibrava, flygon, phanpy, donphan, azurill, marill, azumarill, mawile, shuckle, yanma, nincada, ninjask, mareep]
+    const teleporter = [ralts, ralts, ralts, ralts, ralts, kirlia];
+    const levelPortables = [
+      [togepi, metang, marill, trapinch, phanpy, mawile, shuckle, yanma, nincada, mareep, heracross, sneasle],
+      [togepi, beldum, marill, vibrava, phanpy, mawile, shuckle, yanma, nincada, flaaffy, heracross, sneasle],
+      [togepi, beldum, azurill, vibrava, phanpy, mawile, shuckle, yanma, nincada, flaaffy, heracross, sneasle],
+      [togepi, beldum, azurill, trapinch, donphan, mawile, shuckle, yanma, ninjask, flaaffy, heracross, sneasle],
+      [togepi, beldum, azurill, trapinch, phanpy, mawile, shuckle, yanma, ninjask, flaaffy, heracross, sneasle],
+      [togetic, beldum, azurill, trapinch, phanpy, mawile, shuckle, yanma, ninjask, ampharos, heracross, sneasle]];
+    const levelMoms = [
+      [gardevoir, togetic],
+      [gardevoir, togetic, metagross],
+      [gardevoir, togetic, metagross, azumarill],
+      [gardevoir, togetic, metagross, azumarill, flygon],
+      [gardevoir, togetic, metagross, azumarill, flygon, donphan],
+      [gardevoir, togekiss, metagross, azumarill, flygon, donphan, celebi]
+    ];
+
+    const signLocations = [[[5, 19], [35, 39]], [[5, 19], [35, 39]], [[6, 40], [18, 24]], [[6, 40], [18, 24]], [[7, 37], [25, 39]], [[7, 37], [25, 39]]];
+    const signStatements = [
+      ["NO PASSAGE: PATH CLOSED DUE TO ANOMALOUS TELEKINETIC ACTIVITY", "No solicitors or puzzle-solvers! Go away!"],
+      ["NO PASSAGE: PATH CLOSED DUE TO ANOMALOUS TELEKINETIC ACTIVITY", "No solicitors or puzzle-solvers! Go away!"],
+      ["ROUTE M-12", "PLEASE TELEPORT RESPONSIBLY"],
+      ["ROUTE M-12", "PLEASE TELEPORT RESPONSIBLY (SERIOUSLY!!!)"],
+      ["PUZZLE MASTER CONWAY'S HOUSE", "PLEASE BE RESPECTFUL (SIGNED: CELEBI SHRINE STAFF)"],
+      ["PUZZLE MASTER CONWAY'S HOUSE", "PLEASE BE RESPECTFUL (SIGNED: CELEBI SHRINE STAFF)"]
+    ]
+
+    const emotes = ["sad_emote.gif", "happy_emote.gif"];
+
+    const buttonBox = document.getElementById("buttonBox");
+
+    function fisherYatesShuffle(arr) {
+  	for (let i = arr.length - 1; i > 0; i--) {
+    	const j = Math.floor(Math.random() * (i + 1));
+    	[arr[i], arr[j]] = [arr[j], arr[i]];
+  	}
+  	return arr;
+}
+    var permutablePoints = [];
+    var permutableLines = [];
+    var levelPokemon = [];
+    var positionTwist = [];
+
+    function generateLevel() {
+      document.getElementById("expoBox").innerHTML = levelText[currentLevel];
+      textBox.removeEventListener("click", nextLevel)
+      textBox.textContent = "Can you get the Pok\u00E9mon back where they're needed?"
+
+      positionTwist = [0].concat(fisherYatesShuffle([...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]))
+      //console.log(positionTwist)
+
+      levelPokemon = [teleporter[currentLevel]].concat(fisherYatesShuffle([...levelPortables[currentLevel]]));
+      //console.log([...Array(currentLevel + 2).keys()].map(m => levelPokemon[positionTwist[m]]["id"]), [...Array(currentLevel + 2).keys()].find(n => n != 0 && levelPokemon[positionTwist[n]]["id"] == levelMoms[currentLevel][n]["baby"]))
+      while ([...Array(currentLevel + 2).keys()].some(n => n != 0 && levelPokemon[positionTwist[n]]["id"] == levelMoms[currentLevel][n]["baby"])) {
+        levelPokemon = [teleporter[currentLevel]].concat(fisherYatesShuffle([...levelPortables[currentLevel]]));
+        //console.log([...Array(currentLevel + 2).keys()].map(m => levelPokemon[positionTwist[m]]["id"]), [...Array(currentLevel + 2).keys()].find(n => n != 0 && levelPokemon[positionTwist[n]]["id"] == levelMoms[currentLevel][n]["baby"]))
+      
+      }
+
+      permutablePoints = [...Array(13).keys()];
+      permutableLines = [...Array(13).keys()];
+
+      buttonBox.style.backgroundImage = "url('".concat(levelMaps[currentLevel],"')")
+      buttonBox.replaceChildren();
+      buttonBox.buttons = [];
+      buttonBox.images = [];
+      buttonBox.goals = [];
+
+      var sign1 = document.createElement("schmutton");
+      //sign1.style.backgroundColor = "green";
+      //sign1.style.opacity = ".5";
+      sign1.style.top = (signLocations[currentLevel][0][0]*32).toString().concat("px");
+      sign1.style.left = (signLocations[currentLevel][0][1]*32).toString().concat("px");
+      buttonBox.appendChild(sign1);
+      sign1.addEventListener("click", () => {document.getElementById("textBox").textContent = signStatements[currentLevel][0]})
+
+      var sign2 = document.createElement("schmutton");
+      //sign2.style.backgroundColor = "red";
+      //sign2.style.opacity = ".5";
+      sign2.style.top = (signLocations[currentLevel][1][0]*32).toString().concat("px");
+      sign2.style.left = (signLocations[currentLevel][1][1]*32).toString().concat("px");
+      buttonBox.appendChild(sign2);
+      sign2.addEventListener("click", () => {document.getElementById("textBox").textContent = signStatements[currentLevel][1]})
+
+      for (let i = 0; i < 13; i++) {
+          buttonBox.buttons[positionTwist[i]] = document.createElement("schmutton");
+          var x = buttonBox.buttons[positionTwist[i]];
+          buttonBox.appendChild(x);
+          x.buttonID = positionTwist[i];
+          x.pkmn = levelPokemon[positionTwist[i]];
+          //x.textContent = x.buttonID.toString();
+          //x.textContent = " "
+          //x.style.background = "lightblue";
+          x.style.top = (buttPositions[currentLevel][i][0]*32).toString().concat("px");
+          x.style.left = (buttPositions[currentLevel][i][1]*32).toString().concat("px");
+          x.addEventListener("click", chirp);
+          x.addEventListener("click", swapTiles);
+
+          //buttonBox.images[i] = document.createElement("img");
+          var z = document.createElement("img");
+          x.appendChild(z);
+          z.src = x.pkmn["gif"];
+          //z.style.transform = "scale(2,2)";
+    }
+      for (let i = 0; i < levelMoms[currentLevel].length; i++) {
+          buttonBox.goals[i] = document.createElement("schmutton");
+          var x = buttonBox.goals[i];
+          buttonBox.appendChild(x);
+          x.buttonID = i;
+          x.pkmn = levelMoms[currentLevel][i];
+          x.mindReader = false;
+          if (currentLevel == 5 && i == 0) 
+            {x.mindReader = true;}
+          x.style.top = (momPositions[currentLevel][i][0]*32).toString().concat("px");
+          x.style.left = (momPositions[currentLevel][i][1]*32).toString().concat("px");
+          x.addEventListener("click", chirp);
+          x.addEventListener("click", momHappy);
+
+          //x.style.background = "lightblue";
+          //x.textContent = x.buttonID
+
+          var z = document.createElement("img");
+          x.appendChild(z);
+          z.src = x.pkmn["gif"];
+          //z.style.transform = "scale(2,2)";
+
+          var w = document.createElement("img");
+          x.appendChild(w);
+          w.src = emotes[+(x.pkmn["baby"] == buttonBox.buttons[positionTwist[buttonBox.goals.indexOf(x)]].pkmn["id"] || x.mindReader)];
+          w.style.position = "absolute";
+          w.style.top = "-32px"
+
+    }}
+
+    
+
+  function chirp() {
+    var cryAudio = new Audio(this.pkmn["cry"]);
+    cryAudio.play();
+  }
+
+  function momHappy() {
+    textBox.textContent = [this.pkmn["id"].toUpperCase().concat(" sorely misses ", this.pkmn["baby"].toUpperCase(), "!"), this.pkmn["id"].toUpperCase().concat(" is happy together with ", this.pkmn["baby"].toUpperCase(), "!")][+(this.pkmn["baby"] == buttonBox.buttons[positionTwist[buttonBox.goals.indexOf(this)]].pkmn["id"] || this.mindReader)];
+  }
+
+  function drawLine(n, m) {
+    if (lineList.filter(line => line.includes(n) && line.includes(m)).length == 1) {
+      return lineList.find(line => line.includes(n) && line.includes(m));
+    }
+  }
+
+  function linesOf(n) {
+    return lineList.filter(line => line.includes(n))
+  }
+
+  function intersection(line1, line2) {
+    return [...Array(13).keys()].find(n => line1.includes(n) && line2.includes(n))
+  }
+
+  function swapTiles() {
+
+    if (permutablePoints[this.buttonID] == 0) {
+      document.getElementById("textBox").textContent = "A Pokemon cannot teleport into itself!";
+    }
+
+    if (permutablePoints[this.buttonID] != 0) {
+      var activeLine = drawLine(this.buttonID, permutablePoints.indexOf(0));
+      var holeIndex = permutablePoints.indexOf(0);
+
+      document.getElementById("textBox").textContent = "Swapped ".concat(teleporter[currentLevel]["id"].toUpperCase(), " with ", levelPokemon[permutablePoints[this.buttonID]]["id"].toUpperCase(), " and ", levelPokemon[permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[0]]]["id"].toUpperCase(), " with ", levelPokemon[permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[1]]]["id"].toUpperCase(), "!");
+      [permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[0]], permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[1]]] = [permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[1]], permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[0]]];
+      [permutablePoints[this.buttonID], permutablePoints[holeIndex]] = [0, permutablePoints[this.buttonID]];
+
+      buttonBox.buttons.forEach(butt => {
+        //butt.textContent = permutablePoints[buttonBox.buttons.indexOf(butt)]
+        butt.pkmn = levelPokemon[permutablePoints[buttonBox.buttons.indexOf(butt)]];
+        butt.children[0].src = butt.pkmn["gif"];
+
+      });
+      buttonBox.goals.forEach(momSquare => {
+        momSquare.children[1].src = emotes[+(momSquare.pkmn["baby"] == buttonBox.buttons[positionTwist[buttonBox.goals.indexOf(momSquare)]].pkmn["id"] || momSquare.mindReader)];
+      });
+
+    }
+    if (buttonBox.goals.every(mom => mom.pkmn["baby"] == buttonBox.buttons[positionTwist[buttonBox.goals.indexOf(mom)]].pkmn["id"] || mom.mindReader)) {
+      textBox.textContent = "Well done! Click here to continue.";
+      textBox.addEventListener("click", nextLevel)
+    }
+  }
+
+  function nextLevel() {
+    currentLevel++;
+    if (currentLevel < 6) {
+      generateLevel();}
+    else if (currentLevel >= 6) {
+      secretLevel();
+    }
+  }
+
+  generateLevel();
+
+  const leagueSprites = ["./league/may.png", "./league/roxanne.png", "./league/brawly.png", "./league/wattson.png", "./league/flannery.png", "./league/norman.png", "./league/winona.png", "./league/tate.png", "./league/wallace.png", "./league/phoebe.png", "./league/glacia.png", "./league/drake.png", "./league/steven.png"];
+  const leaguePositions = [[161, 482], [112, 32], [257, 64], [128, 161], [80, 112], [177, 48], [32, 225], [112, 433], [161, 401], [112, 289], [207, 18], [249, 116], [80, 32]];
+  const hoennPkmn = [raikou, entei, suicune, latios, latias, metagross, ampharos, togekiss, flygon, azumarill, ninjask, xatu, claydol];
+  const pkmnPositions = [[68, 209], [64, 128], [32, 48], [169, 201], [257, 225], [128, 241], [80, 177], [80, 417], [161, 128], [64, 289], [201, 513], [32, 160], [249, 337]]
+  const hoennCities = ["EVERGRANDE CITY", "RUSTBORO CITY", "DEWFORD TOWN", "MAUVILLE CITY", "LAVARIDGE TOWN", "PETALBURG CITY", "FORTREE CITY", "MOSSDEEP ISLAND", "SOOTOPOLIS CITY", "MT. PYRE", "A MYSTERIOUS ICY RUIN", "A WRECKED SHIP", "METEOR FALLS"]
+  var roamingPkmn = [];
+
+
+  function secretLevel() {
+    document.getElementById("expoBox").innerHTML = "All grown up now, GARDEVOIR has joined the team of MAY, a rising force in HOENN. Currently she is serving as the first member of the region ELITE FOUR under CHAMPION STEVEN, tending to the POKEMON LEAGUE HQ while the others are away on business and pleasure. MAY, however, is much more than an ELITE FOUR member. She is more than even a future CHAMPION. She is the exalted and exclusive <span style='font-variant: small-caps;'>Player Character</span>, a sort of Messianic figure with a fittingly mysterious and intimate connection to the divine. Nor just some piddling local <i>kami</i>, either. Beyond the legendaries, beyond even the lord ARCEUS, there is a Force only dimly acknowledged and even less understood, whispered of by half-mad HEX GIRLS and heretical PROFESSORS under the name of the <span style='font-variant: small-caps;'>Random Number Generator</span>. The RNG (as it is abbreviated) is supposed to govern, among other things, the location of roaming legendary Pok\u00E9mon, responding here in an obscure way to the movements of the <span style='font-variant: small-caps;'>Player Character</span>. <br><br>Navigating the subtleties of this connection, see if by judicious teleportation of MAY across the region you can return the roaming legendaries to their appropriate haunts: RAIKOU to the stormy ROUTE 119, ENTEI to the peak of MT. CHIMNEY, SUICUNE to the serene headwaters of METEOR FALLS north of the cave, LATIOS to the FABLED CAVE south of MAUVILLE, and LATIAS to her distant home on SOUTHERN ISLAND. Make sure that MAY is back at the LEAGUE HQ in the end to man the fort!"
+    
+    roamingPkmn = fisherYatesShuffle([...hoennPkmn]);
+    //var roamingPkmn = hoennPkmn;
+
+    var permutablePoints = [...Array(13).keys()];
+    var permutableLines = [...Array(13).keys()];
+
+    buttonBox.style.backgroundImage = "url('hoenn_map.png')"
+    buttonBox.style.width = "1220px"
+    buttonBox.style.height = "578px"
+
+    buttonBox.replaceChildren();
+
+    buttonBox.buttons = [];
+    buttonBox.roamSquares = [];
+
+    for (let i = 0; i < 13; i++) {
+      buttonBox.buttons[i] = document.createElement("schmutton");
+      var x = buttonBox.buttons[i];
+      x.buttonID = i;
+      x.style.top = (leaguePositions[i][0]*2).toString().concat("px");
+      x.style.left = (leaguePositions[i][1]*2).toString().concat("px");
+      //x.textContent = i;
+      x.style.backgroundSize = "100% 100%";
+      x.style.backgroundImage = "url('".concat(leagueSprites[i], "')");
+      //x.style.backgroundColor = "green";
+      buttonBox.appendChild(x);
+      x.addEventListener("click", roamSwap)
+    }
+
+    for (let i = 0; i < 13; i++) {
+      buttonBox.roamSquares[i] = document.createElement("schmutton");
+      var y = buttonBox.roamSquares[i];
+      y.lineID = i;
+      y.pkmn = roamingPkmn[i];
+      y.line = i;
+      y.style.top = (pkmnPositions[i][0]*2).toString().concat("px");
+      y.style.left = (pkmnPositions[i][1]*2).toString().concat("px");
+      buttonBox.appendChild(y);
+      y.addEventListener("click", chirp);
+      console.log(y.pkmn["id"].concat(" : ", lineList[i]))
+
+      var z = document.createElement("img");
+      y.appendChild(z);
+      z.src = y.pkmn["gif"];
+    }
+  
+  }
+
+  function roamSwap() {
+    if (permutablePoints[this.buttonID] == 0) {
+      document.getElementById("textBox").textContent = "You cannot teleport to where you already are!"
+    }
+
+    if (permutablePoints[this.buttonID] != 0) {
+      var activeLine = drawLine(this.buttonID, permutablePoints.indexOf(0));
+      var holeIndex = permutablePoints.indexOf(0);
+
+      if (activeLine != lineList[permutableLines.indexOf(0)]) {
+        console.log("DEVIATED");
+        var lineHoleIndex = permutableLines.indexOf(0);
+        var activeDualLine = linesOf(holeIndex).map(line => lineList.indexOf(line));
+        console.log(activeDualLine);
+        //document.getElementById("textBox2").textContent = "Swapped Lines :".concat(JSON.stringify([permutableLines[activeDualLine.filter(n => (n != lineList.indexOf(activeLine) && permutableLines[n] != 0))[0]], permutableLines[activeDualLine.filter(n => (n != lineList.indexOf(activeLine) && permutableLines[n] != 0))[1]]]), JSON.stringify([permutableLines[lineList.indexOf(activeLine)], permutableLines[lineHoleIndex]]));
+        
+        [permutableLines[activeDualLine.filter(n => (n != lineList.indexOf(activeLine) && permutableLines[n] != 0))[0]], permutableLines[activeDualLine.filter(n => (n != lineList.indexOf(activeLine) && permutableLines[n] != 0))[1]]] = [permutableLines[activeDualLine.filter(n => (n != lineList.indexOf(activeLine) && permutableLines[n] != 0))[1]], permutableLines[activeDualLine.filter(n => (n != lineList.indexOf(activeLine) && permutableLines[n] != 0))[0]]];
+        [permutableLines[lineList.indexOf(activeLine)], permutableLines[lineHoleIndex]] = [0, permutableLines[lineList.indexOf(activeLine)]];
+
+        //lineBox.lines.forEach(lin => {
+          //lin.textContent = permutableLines[lineBox.lines.indexOf(lin)].toString().concat(" : ", lineList[lin.lineID].toString())});
+        buttonBox.roamSquares.forEach(square => {
+          square.line = permutableLines[buttonBox.roamSquares.indexOf(square)];
+          square.pkmn = roamingPkmn[square.line];
+          //square.textContent = square.line.toString();
+          square.children[0].src = square.pkmn["gif"];
+        });
+      }
+
+      document.getElementById("textBox").textContent = "Teleported to ".concat(hoennCities[this.buttonID], ".");
+      [permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[0]], permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[1]]] = [permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[1]], permutablePoints[activeLine.filter(n => (n != this.buttonID && permutablePoints[n] != 0))[0]]];
+      [permutablePoints[this.buttonID], permutablePoints[holeIndex]] = [0, permutablePoints[this.buttonID]];
+
+      buttonBox.buttons.forEach(butt => {
+        //butt.textContent = permutablePoints[buttonBox.buttons.indexOf(butt)]
+        //butt.pkmn = levelPokemon[permutablePoints[buttonBox.buttons.indexOf(butt)]];
+        butt.style.backgroundImage = "url('".concat(leagueSprites[permutablePoints[buttonBox.buttons.indexOf(butt)]], "')");
+
+      });
+
+    }
+    console.log(buttonBox.buttons[0].style.backgroundImage)
+    if ([0, 1, 2, 3, 4].every(n => buttonBox.roamSquares[n].pkmn["id"] == hoennPkmn[n]["id"]) && buttonBox.buttons[0].style.backgroundImage == 'url("./league/may.png")') {
+      textBox.innerHTML = "<a href='happy_emote.gif'>Hooray!!!</a>"
+      textBox.addEventListener("click", () => {return true})
+    }
+  }
+
+  //secretLevel();
+  
+  
+</script>
+</body> 
+</html>
